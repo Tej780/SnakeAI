@@ -7,7 +7,10 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from SnakeEnv import SnakeEnvironment
 
-EPISODES = 10
+EPISODES = 30
+DURATION = 500
+SW = 50
+SH = 50
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
@@ -15,8 +18,8 @@ class DQNAgent:
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
         self.gamma = 0.95    # discount rate
-        self.epsilon = 1.0  # exploration rate
-        self.epsilon_min = 0.01
+        self.epsilon = 0.5  # exploration rate
+        self.epsilon_min = 0.05
         self.epsilon_decay = 0.995
         self.learning_rate = 0.001
         self.model = self._build_model()
@@ -62,26 +65,25 @@ class DQNAgent:
 
 if __name__ == "__main__":
     render = True
-    env = SnakeEnvironment(screenWidth = 20, screenHeight = 20,render = render)
+    env = SnakeEnvironment(screenWidth = SW, screenHeight = SH,render = render)
     state_size = len(env.state)
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
     agent.load("snake-dqn.h5")
-    done = False
     batch_size = 32
 
     for e in range(EPISODES):
-        env = SnakeEnvironment(screenWidth=20, screenHeight=20, render=render)
+        env = SnakeEnvironment(screenWidth=SW, screenHeight=SH, render=render)
         state = env.state
         state = np.reshape(state, [1, state_size])
-        for time in range(500):
+        for time in range(DURATION+1):
             action = agent.act(state)
             next_state, reward, done, _ = env.step(action)
-            reward = reward if not done else -1
             next_state = np.reshape(next_state, [1, state_size])
-            agent.remember(state, action, reward, next_state, done)
+            if reward != 0:
+                agent.remember(state, action, reward, next_state, done)
             state = next_state
-            if done:
+            if done or time == DURATION:
                 print("episode: {}/{}, score: {}, e: {:.2}"
                       .format(e, EPISODES, env.totalReward, agent.epsilon))
                 break
