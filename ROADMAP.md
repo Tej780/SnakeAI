@@ -4,21 +4,21 @@
 
 ### Open Source Docs
 - [x] Gitignore
-- [] Readme
-- [] Liciense
-- [] Changelog
+- [ ] Readme
+- [ ] Liciense
+- [ ] Changelog
 
 ### README
-- [] Project Description
-- [] Install
-- [] Changelog
-- [] Author
-- [] Usage
-- [] Requirements
-- [] Build-with
-- [] License
+- [ ] Project Description
+- [ ] Install
+- [ ] Changelog
+- [ ] Author
+- [ ] Usage
+- [ ] Requirements
+- [ ] Build-with
+- [ ] License
 
 ### Continuous Integration
-- Write tests
+- [ ] Write tests
 
 
