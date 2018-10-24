@@ -4,8 +4,8 @@
 
 ### Open Source Docs
 - [x] Gitignore
-- [ ] Readme
-- [ ] Liciense
+- [x] Readme
+- [x] License
 - [ ] Changelog
 
 ### README
