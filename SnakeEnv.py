@@ -21,9 +21,11 @@ class SnakeEnvironment:
         self.died = False
         self.actions = ['FORWARD', 'LEFT', 'RIGHT']
         self.directions = [[0, -1], [1, 0], [0, 1], [-1, 0]] #[UP,RIGHT,DOWN,LEFT]
-        self.direction = 1
+        self.direction = 0
+        obstacles = self.obstacle()
         self.state = [self.segments[0][0], self.segments[0][1], self.apple[0], self.apple[1],
                       self.xDirection(), self.yDirection(),
+                      obstacles[0], obstacles[1], obstacles[2],
                       self.distanceToApple(), self.angleToApple()]
         self.totalReward = 0
         self.render = render
@@ -40,29 +42,28 @@ class SnakeEnvironment:
 
         distance = self.distanceToApple()
 
-        if action == 'FORWARD':
-            pass
-        elif action == 'LEFT':
-            self.direction = (self.direction - 1) % 4
-        elif action == 'RIGHT':
-            self.direction = (self.direction + 1) % 4
-
         for i in range(len(self.segments)-1,0,-1):
             self.segments[i] = self.segments[i-1]
 
-        self.segments[0] = [self.segments[0][0] + self.xDirection(), self.segments[0][1] + self.yDirection()]
+        if action == 'FORWARD':
+            self.segments[0] = self.front()
+        elif action == 'LEFT':
+            self.segments[0] = self.left()
+            self.direction = (self.direction - 1) % 4
+        elif action == 'RIGHT':
+            self.segments[0] = self.right()
+            self.direction = (self.direction + 1) % 4
 
         newDistance = self.distanceToApple()
 
-        #if newDistance < distance:
-        #    stepReward += 0.01
+        if newDistance < distance:
+            stepReward += 0.001
         for i in range(len(self.segments)-1):
             if self.segments[0] == self.segments[i+1]:
-                stepReward -= 2
+                stepReward -= 1
                 self.died = True
                 break
-        if self.segments[0][0] < 0 or self.segments[0][0] > self.screenSize[0] \
-                or self.segments[0][1] < 0 or self.segments[0][1] > self.screenSize[1]:
+        if self.isInWall(self.segments[0]):
             stepReward -= 1
             self.died = True
 
@@ -71,8 +72,10 @@ class SnakeEnvironment:
             self.apple = self.randomLocation()
             self.grow()
 
+        obstacles = self.obstacle()
         newState = [self.segments[0][0], self.segments[0][1], self.apple[0], self.apple[1],
                     self.xDirection(), self.yDirection(),
+                    obstacles[0],obstacles[1],obstacles[2],
                     self.distanceToApple(), self.angleToApple()]
         self.totalReward += stepReward
         if self.render:
@@ -136,3 +139,41 @@ class SnakeEnvironment:
         directionOfBody = [finalSegment[0]-penultimateSegment[0],finalSegment[1]-penultimateSegment[1]]
         newSegment = [finalSegment[0]-directionOfBody[0],finalSegment[1]-directionOfBody[1]]
         self.segments.append(newSegment)
+
+    def left(self):
+        return [self.segments[0][0] + self.directions[(self.direction - 1) % 4][0],
+                self.segments[0][1] + self.directions[(self.direction - 1) % 4][1]]
+
+    def right(self):
+        return [self.segments[0][0] + self.directions[(self.direction + 1) % 4][0],
+                 self.segments[0][1] + self.directions[(self.direction + 1) % 4][1]]
+
+    def front(self):
+        return [self.segments[0][0] + self.xDirection(),
+                 self.segments[0][1] + self.yDirection()]
+
+    def isInWall(self,coords):
+        return coords[0] < 0 or coords[0] > self.screenSize[0] \
+               or coords[1] < 0 or coords[1] > self.screenSize[1]
+
+    def obstacle(self):
+        obstacleOnLeft = False
+        obstacleOnRight = False
+        obstacleInFront = False
+
+        if self.isInWall(self.right()):
+            obstacleOnRight = True
+        if self.isInWall(self.left()):
+            obstacleOnLeft = True
+        if self.isInWall(self.front()):
+            obstacleInFront = True
+
+        for i in range(len(self.segments)-1):
+            if self.right() == self.segments[i+1]:
+                obstacleOnRight = True
+            if self.left() == self.segments[i + 1]:
+                obstacleOnLeft = True
+            if self.front() == self.segments[i + 1]:
+                obstacleInFront = True
+
+        return [obstacleInFront,obstacleOnRight,obstacleOnLeft]

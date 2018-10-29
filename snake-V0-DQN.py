@@ -7,10 +7,10 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from SnakeEnv import SnakeEnvironment
 
-EPISODES = 30
+EPISODES = 200
 DURATION = 500
-SW = 50
-SH = 50
+SW = 20
+SH = 20
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
@@ -20,8 +20,8 @@ class DQNAgent:
         self.gamma = 0.95    # discount rate
         self.epsilon = 0.5  # exploration rate
         self.epsilon_min = 0.05
-        self.epsilon_decay = 0.995
-        self.learning_rate = 0.001
+        self.epsilon_decay = 0.3
+        self.learning_rate = 0.01
         self.model = self._build_model()
 
     def _build_model(self):
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     state_size = len(env.state)
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
-    agent.load("snake-dqn.h5")
+    agent.load("snake-v1-dqn.h5")
     batch_size = 32
 
     for e in range(EPISODES):
@@ -90,4 +90,4 @@ if __name__ == "__main__":
             if len(agent.memory) > batch_size:
                 agent.replay(batch_size)
         if e % 10 == 0:
-            agent.save("snake-dqn.h5")
+            agent.save("snake-v1-dqn.h5")
