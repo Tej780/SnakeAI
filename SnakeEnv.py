@@ -57,18 +57,18 @@ class SnakeEnvironment:
         newDistance = self.distanceToApple()
 
         if newDistance < distance:
-            stepReward += 0.001
+            stepReward = 1/(newDistance+0.0000000001)
         for i in range(len(self.segments)-1):
             if self.segments[0] == self.segments[i+1]:
-                stepReward -= 1
+                stepReward = -1
                 self.died = True
                 break
         if self.isInWall(self.segments[0]):
-            stepReward -= 1
+            stepReward = -1
             self.died = True
 
         if self.segments[0] == self.apple:
-            stepReward += 10
+            stepReward = 1
             self.apple = self.randomLocation()
             self.grow()
 
