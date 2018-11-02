@@ -3,7 +3,7 @@ import sys
 from random import randint
 import numpy as np
 
-fps = 3
+fps = 15
 RED = [255, 0, 0]
 GREEN = [0, 255, 0]
 DARK_GREEN = [0,128,0]
@@ -57,18 +57,18 @@ class SnakeEnvironment:
         newDistance = self.distanceToApple()
 
         if newDistance < distance:
-            stepReward += 0.001
+            stepReward = 0.06
         for i in range(len(self.segments)-1):
             if self.segments[0] == self.segments[i+1]:
-                stepReward -= 1
+                stepReward = -1
                 self.died = True
                 break
         if self.isInWall(self.segments[0]):
-            stepReward -= 1
+            stepReward = -0.5
             self.died = True
 
         if self.segments[0] == self.apple:
-            stepReward += 10
+            stepReward = 2
             self.apple = self.randomLocation()
             self.grow()
 
