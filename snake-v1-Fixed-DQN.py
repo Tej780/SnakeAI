@@ -5,7 +5,7 @@ from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
-from SnakeEnv import SnakeEnvironment
+from SnakeAI.SnakeEnv import SnakeEnvironment
 import matplotlib.pyplot as plt
 
 
@@ -21,25 +21,17 @@ class DQNAgent:
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
         self.learning_rate = 0.01
-        self.model_depth_min = 1
-        self.model_depth_max = 4
-        self.model_height_min = 5
-        self.model_height_max = 7
+        self.model_depth = 1
+        self.layer_height = 2**5
         self.layers = []
-
         self.model = self._build_model()
-
-    def random_layer_height(self):
-        return 2**random.randint(self.model_height_min,self.model_height_max)
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
         model.add(Dense(16, input_dim=self.state_size, activation='relu'))
-        for i in range(random.randint(self.model_depth_min,self.model_depth_max)):
-            layer_height = self.random_layer_height()
-            self.layers.append(layer_height)
-            model.add(Dense(layer_height, activation='relu'))
+        for i in range(self.model_depth):
+            model.add(Dense(self.layer_height, activation='relu'))
             model.add(Dropout(0.3))
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss='mse',
@@ -77,8 +69,8 @@ class DQNAgent:
 
 EPISODES = 200
 DURATION = 500
-SW = 5
-SH = 5
+SW = 20
+SH = 20
 
 if __name__ == "__main__":
     render = True
