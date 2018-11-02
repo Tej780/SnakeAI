@@ -3,7 +3,7 @@ import sys
 from random import randint
 import numpy as np
 
-fps = 3
+fps = 15
 RED = [255, 0, 0]
 GREEN = [0, 255, 0]
 DARK_GREEN = [0,128,0]

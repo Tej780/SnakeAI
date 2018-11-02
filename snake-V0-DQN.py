@@ -86,8 +86,8 @@ if __name__ == "__main__":
     state_size = len(env.state)
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
+    batch_size = 50
     #agent.load("snake-v1-dqn.h5")
-    batch_size = 32
     print(agent.model.summary())
     scores = []
 
