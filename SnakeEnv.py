@@ -10,27 +10,23 @@ DARK_GREEN = [0,128,0]
 
 class SnakeEnvironment:
 
-    def __init__(self, screenWidth=10, screenHeight=10, render=False):
+    def __init__(self, screenWidth=10, screenHeight=10):
         self.screenSize = [screenWidth, screenHeight]
         self.segments = []
         for i in range(5):
             self.segments.append([screenWidth / 2, (screenHeight / 2) + 1])
 
 
+        #self.apple = self.randomLocation()
         self.apple = self.randomLocation()
         self.died = False
         self.actions = ['FORWARD', 'LEFT', 'RIGHT']
         self.directions = [[0, -1], [1, 0], [0, 1], [-1, 0]] #[UP,RIGHT,DOWN,LEFT]
         self.direction = 0
         obstacles = self.obstacle()
-        self.state = [self.segments[0][0], self.segments[0][1], self.apple[0], self.apple[1],
-                      self.xDirection(), self.yDirection(),
-                      obstacles[0], obstacles[1], obstacles[2],
-                      self.distanceToApple(), self.angleToApple()]
         self.totalReward = 0
-        self.render = render
-        if self.render:
-            self.initialiseRender()
+        self.initialiseRender()
+        self.state = self.get_pixels()
 
     def randomLocation(self):
         return [randint(0, self.screenSize[0]), randint(0, self.screenSize[1])]
@@ -57,7 +53,7 @@ class SnakeEnvironment:
         newDistance = self.distanceToApple()
 
         if newDistance < distance:
-            stepReward = 1/(newDistance+0.0000000001)
+            stepReward = 0.01
         for i in range(len(self.segments)-1):
             if self.segments[0] == self.segments[i+1]:
                 stepReward = -1
@@ -73,15 +69,12 @@ class SnakeEnvironment:
             self.grow()
 
         obstacles = self.obstacle()
-        newState = [self.segments[0][0], self.segments[0][1], self.apple[0], self.apple[1],
-                    self.xDirection(), self.yDirection(),
-                    obstacles[0],obstacles[1],obstacles[2],
-                    self.distanceToApple(), self.angleToApple()]
         self.totalReward += stepReward
-        if self.render:
-            self.updateDisplay()
+        self.updateDisplay()
+        new_state = self.get_pixels()
+        self.state = new_state
 
-        return newState, stepReward, self.died, {}
+        return new_state, stepReward, self.died, {}
 
     def initialiseRender(self):
 
@@ -117,6 +110,7 @@ class SnakeEnvironment:
         apple = pygame.Rect(self.apple[0] * 10, self.apple[1] * 10, 10, 10)
         pygame.draw.rect(self.screen, RED, apple)
         pygame.display.update()
+
 
         #self.clock.tick(fps)
 
@@ -177,3 +171,9 @@ class SnakeEnvironment:
                 obstacleInFront = True
 
         return [obstacleInFront,obstacleOnRight,obstacleOnLeft]
+
+    def get_pixels(self):
+        surface = self.screen
+        pixel_array = pygame.surfarray.array3d(surface)
+        #pixel_array = np.dot(pixel_array[..., :3], [0.299, 0.587, 0.114])
+        return pixel_array
