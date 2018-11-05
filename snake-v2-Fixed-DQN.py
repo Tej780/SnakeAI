@@ -20,7 +20,7 @@ class DQNAgent:
         self.epsilon = 0.5  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
-        self.learning_rate = 0.01
+        self.learning_rate = 0.1
         self.model_depth = 3
         self.layer_height = 64
         self.layers = []
@@ -32,8 +32,7 @@ class DQNAgent:
         model = Sequential()
         model.add(Conv2D(4, (3, 3), padding='same', activation='relu',
                          input_shape=input_shape))
-        model.add(MaxPool2D(pool_size=(2,2)))
-
+        #model.add(MaxPool2D(pool_size=(2,2)))
         model.add(Flatten())
         model.add(Dense(128, activation='relu'))
         model.add(Dense(self.action_size, activation='softmax'))
@@ -81,8 +80,8 @@ class DQNAgent:
 
 EPISODES = 2000
 DURATION = 500
-SW = 30
-SH = 30
+SW = 10
+SH = 10
 
 if __name__ == "__main__":
     env = SnakeEnvironment(screenWidth = SW, screenHeight = SH)
@@ -90,7 +89,7 @@ if __name__ == "__main__":
     action_size = len(env.actions)
     agent = DQNAgent(state_shape, action_size)
     batch_size = 10
-    agent.load("snake-v2-dqn.h5")
+    #agent.load("snake-v2-dqn.h5")
     print(agent.model.summary())
     scores = []
 

@@ -7,13 +7,14 @@ fps = 15
 RED = [255, 0, 0]
 GREEN = [0, 255, 0]
 DARK_GREEN = [0,128,0]
+scale=8
 
 class SnakeEnvironment:
 
     def __init__(self, screenWidth=10, screenHeight=10):
         self.screenSize = [screenWidth, screenHeight]
         self.segments = []
-        for i in range(5):
+        for i in range(4):
             self.segments.append([screenWidth / 2, (screenHeight / 2) + 1])
 
 
@@ -33,7 +34,7 @@ class SnakeEnvironment:
 
     def step(self, actionArg):
 
-        stepReward = 0
+        stepReward = -0.01
         action = self.actions[actionArg]
 
         distance = self.distanceToApple()
@@ -53,18 +54,18 @@ class SnakeEnvironment:
         newDistance = self.distanceToApple()
 
         if newDistance < distance:
-            stepReward = 0.01
+            stepReward += 0.01
         for i in range(len(self.segments)-1):
             if self.segments[0] == self.segments[i+1]:
-                stepReward = -1
+                stepReward += -1
                 self.died = True
                 break
         if self.isInWall(self.segments[0]):
-            stepReward = -1
+            stepReward += -1
             self.died = True
 
         if self.segments[0] == self.apple:
-            stepReward = 1
+            stepReward += 1
             self.apple = self.randomLocation()
             self.grow()
 
@@ -79,17 +80,17 @@ class SnakeEnvironment:
     def initialiseRender(self):
 
         pygame.init()
-        self.screen = pygame.display.set_mode(((self.screenSize[0]+1) * 10, (self.screenSize[1]+1) * 10))
+        self.screen = pygame.display.set_mode(((self.screenSize[0]+1) * scale, (self.screenSize[1]+1) * scale))
         pygame.mouse.set_visible(0)
         self.clock = pygame.time.Clock()
 
-        player = pygame.Rect(self.segments[0][0] * 10, self.segments[0][1] * 10, 9, 9)
+        player = pygame.Rect(self.segments[0][0] * scale, self.segments[0][1] * scale, scale-1, scale-1)
         pygame.draw.rect(self.screen, GREEN, player)
         for i in range(len(self.segments) - 1):
-            player = pygame.Rect(self.segments[i + 1][0] * 10, self.segments[i + 1][1] * 10, 9, 9)
+            player = pygame.Rect(self.segments[i + 1][0] * scale, self.segments[i + 1][1] * scale, scale-1, scale-1)
             pygame.draw.rect(self.screen, DARK_GREEN, player)
 
-        apple = pygame.Rect(self.apple[0] * 10, self.apple[1] * 10, 10, 10)
+        apple = pygame.Rect(self.apple[0] * scale, self.apple[1] * scale, scale, scale)
         pygame.draw.rect(self.screen, RED, apple)
 
         pygame.display.flip()
@@ -102,12 +103,12 @@ class SnakeEnvironment:
                 pygame.quit()
                 sys.exit()
         self.screen.fill((0, 0, 0))
-        player = pygame.Rect(self.segments[0][0] * 10, self.segments[0][1] * 10, 9, 9)
+        player = pygame.Rect(self.segments[0][0] * scale, self.segments[0][1] * scale, scale-1, scale-1)
         pygame.draw.rect(self.screen, GREEN, player)
         for i in range(len(self.segments)-1):
-            player = pygame.Rect(self.segments[i+1][0] * 10, self.segments[i+1][1] * 10, 9, 9)
+            player = pygame.Rect(self.segments[i+1][0] * scale, self.segments[i+1][1] * scale, scale-1, scale-1)
             pygame.draw.rect(self.screen, DARK_GREEN, player)
-        apple = pygame.Rect(self.apple[0] * 10, self.apple[1] * 10, 10, 10)
+        apple = pygame.Rect(self.apple[0] * scale, self.apple[1] * scale, scale, scale)
         pygame.draw.rect(self.screen, RED, apple)
         pygame.display.update()
 
