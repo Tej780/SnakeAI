@@ -19,7 +19,7 @@ class DQNAgent:
         self.gamma = 0.99    # discount rate
         self.epsilon = 0.5  # exploration rate
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.99
+        self.epsilon_decay = 0.999
         self.learning_rate = 0.01
         self.model_depth = 1
         self.layer_height = 2**5
@@ -71,7 +71,7 @@ class DQNAgent:
         self.target_network.set_weights(self.DQN.get_weights())
 
 
-EPISODES = 200
+EPISODES = 2000
 DURATION = 500
 SW = 20
 SH = 20
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
     batch_size = 50
-    #agent.load("snake-v3-dqn.h5")
+    agent.load("snake-v3-dqn.h5")
     print(agent.DQN.summary())
     scores = []
 
