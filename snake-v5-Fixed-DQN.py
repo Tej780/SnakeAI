@@ -53,13 +53,15 @@ class DQNAgent:
         for state, action, reward, next_state, done in minibatch:
             target = reward
             if not done:
-                target = (reward + self.gamma *
-                          np.amax(self.target_network.predict(next_state)[0]))
+                action_for_next_state = self.act(next_state)
+                target = (reward + self.gamma * self.target_network.predict(next_state)[0][action_for_next_state]
+                          )
             target_f = self.DQN.predict(state)
             target_f[0][action] = target
             self.DQN.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+
 
     def load(self, name):
         self.DQN.load_weights(name)
@@ -71,7 +73,7 @@ class DQNAgent:
         self.target_network.set_weights(self.DQN.get_weights())
 
 
-EPISODES = 2000
+EPISODES = 200
 DURATION = 500
 SW = 20
 SH = 20
