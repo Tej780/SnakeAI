@@ -78,7 +78,7 @@ if __name__ == "__main__":
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
     batch_size = 50
-    #agent.load("snake-v1-dqn.h5")
+    #agent.load("snake-v5-dqn.h5")
     print(agent.model.summary())
     scores = []
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             if len(agent.memory) > batch_size:
                 agent.replay(batch_size)
         if e % 10 == 0:
-            agent.save("snake-v1-dqn.h5")
+            agent.save("snake-v5-dqn.h5")
 
 
     plt.plot(range(len(scores)),scores)
