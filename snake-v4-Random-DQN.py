@@ -53,11 +53,12 @@ class DQNAgent:
         for state, action, reward, next_state, done in minibatch:
             target = reward
             if not done:
-                target = (reward + self.gamma *
-                          np.amax(self.model.predict(next_state)[0]))
-            target_f = self.model.predict(state)
+                action_for_next_state = self.act(next_state)
+                target = (reward + self.gamma * self.target_network.predict(next_state)[0][action_for_next_state]
+                          )
+            target_f = self.DQN.predict(state)
             target_f[0][action] = target
-            self.model.fit(state, target_f, epochs=1, verbose=0)
+            self.DQN.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
     batch_size = 50
-    #agent.load("snake-v1-dqn.h5")
+    #agent.load("snake-v4-dqn.h5")
     print(agent.model.summary())
     scores = []
 
@@ -103,7 +104,7 @@ if __name__ == "__main__":
             if len(agent.memory) > batch_size:
                 agent.replay(batch_size)
         if e % 10 == 0:
-            agent.save("snake-v1-dqn.h5")
+            agent.save("snake-v4-dqn.h5")
 
 
     plt.plot(range(len(scores)),scores)
