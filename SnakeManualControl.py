@@ -1,19 +1,17 @@
-from SnakeEnv import SnakeEnvironment
+from SnakeEnv.SnakeEnv import SnakeEnvironment
 import pygame
 import sys
-
 
 SW = 20
 SH = 20
 
 if __name__ == "__main__":
     render = True
-    env = SnakeEnvironment(screenWidth = SW, screenHeight = SH,render = render)
+    env = SnakeEnvironment(screenWidth=SW, screenHeight=SH, render=render)
     for time in range(500):
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-
                 pygame.quit()
                 sys.exit()
             action = 0
