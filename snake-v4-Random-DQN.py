@@ -2,8 +2,8 @@
 import random
 import numpy as np
 from collections import deque
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.models import Model
+from keras.layers import Dense, Dropout, Input
 from keras.optimizers import Adam
 from SnakeAI.SnakeEnv import SnakeEnvironment
 import matplotlib.pyplot as plt
@@ -27,12 +27,14 @@ class DQNAgent:
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
-        model = Sequential()
-        model.add(Dense(16, input_dim=self.state_size, activation='relu'))
+        _input = Input(shape=(self.state_size,))
+        x = Dense(16,  activation='relu')(_input)
+
         for i in range(self.model_depth):
-            model.add(Dense(self.layer_height, activation='relu'))
-            model.add(Dropout(0.3))
-        model.add(Dense(self.action_size, activation='linear'))
+            x=Dense(self.layer_height, activation='relu')(x)
+            x=Dropout(0.3)(x)
+        _output = Dense(self.action_size, activation='linear')(x)
+        model = Model(inputs=_input,outputs=_output)
         model.compile(loss='mse',
                       optimizer=Adam(lr=self.learning_rate))
         return model
