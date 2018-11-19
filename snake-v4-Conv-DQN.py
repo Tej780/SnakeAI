@@ -3,10 +3,10 @@ import random
 import numpy as np
 from collections import deque
 from keras.models import Model
-from keras.layers import Dense, Dropout, Input, Lambda
+from keras.layers import Dense, Input,Conv2D, Lambda, Flatten
 from keras.backend import mean, max, expand_dims
 from keras.optimizers import Adam
-from SnakeAI.SnakeEnv import SnakeEnvironment
+from SnakeAI.SnakeEnvConv import SnakeEnvironment
 import matplotlib.pyplot as plt
 
 
@@ -32,14 +32,25 @@ class DQNAgent:
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
-        _input = Input(shape=(self.state_size,))
-        x = Dense(256,  activation='relu')(_input)
-
-        #for i in range(self.model_depth):
-        #    x=Dense(self.layer_height, activation='relu')(x)
-        #   x=Dropout(0.3)(x)
-
-        #Dueling DQN
+        _input = Input(self.state_size)
+        x = Conv2D(
+        16,
+        kernel_size=(3, 3),
+        padding='same',
+        strides=(1, 1),
+        data_format='channels_first',
+        activation='relu'
+        )(_input)
+        x = Conv2D(
+            32,
+            kernel_size=(3, 3),
+            padding='same',
+            strides=(1, 1),
+            data_format='channels_first',
+            activation='relu'
+        )(x)
+        x = Flatten()(x)
+        x = Dense(256,  activation='relu')(x)
         y = Dense(self.action_size+1, activation='linear')(x)
 
         if self.dueling_type == 'avg':
@@ -96,14 +107,14 @@ class DQNAgent:
 
 EPISODES = 10000
 DURATION = 500
-SW = 10
-SH = 10
+SW = 20
+SH = 20
 tau = 100
 
 if __name__ == "__main__":
     render = True
     env = SnakeEnvironment(screenWidth = SW, screenHeight = SH,render = render)
-    state_size = len(env.state)
+    state_size = env.state.shape
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
     batch_size = 50
@@ -111,14 +122,18 @@ if __name__ == "__main__":
     print(agent.DQN.summary())
     scores = []
 
+    input_size = (-1,) + state_size
+
     for e in range(EPISODES):
         env = SnakeEnvironment(screenWidth=SW, screenHeight=SH, render=render)
         state = env.state
-        state = np.reshape(state, [1, state_size])
+
+        state = state.reshape(input_size)
+
         for time in range(DURATION+1):
             action = agent.act(state)
             next_state, reward, done, _ = env.step(action)
-            next_state = np.reshape(next_state, [1, state_size])
+            next_state = next_state.reshape(input_size)
             if reward != 0:
                 agent.remember(state, action, reward, next_state, done)
             state = next_state
@@ -127,11 +142,10 @@ if __name__ == "__main__":
                       .format(e, EPISODES, env.totalReward, agent.epsilon))
                 scores.append(env.totalReward)
                 break
-
-            if len(agent.memory) > batch_size:
-                agent.replay(batch_size)
             if time % tau == 0:
                 agent.update_target_weights()
+        if len(agent.memory) > batch_size:
+            agent.replay(batch_size)
         if e % 10 == 0:
             agent.save("snake-v4-dqn.h5")
 
