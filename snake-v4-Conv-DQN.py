@@ -105,10 +105,10 @@ class DQNAgent:
         self.target_network.set_weights(self.DQN.get_weights())
 
 
-EPISODES = 10000
+EPISODES = 1000
 DURATION = 500
-SW = 20
-SH = 20
+SW = 10
+SH = 10
 tau = 100
 
 if __name__ == "__main__":
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
     batch_size = 50
-    #agent.load("snake-v4-dqn.h5")
+    agent.load("snake-v4-conv-dqn.h5")
     print(agent.DQN.summary())
     scores = []
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
         if len(agent.memory) > batch_size:
             agent.replay(batch_size)
         if e % 10 == 0:
-            agent.save("snake-v4-dqn.h5")
+            agent.save("snake-v4-conv-dqn.h5")
 
 
     plt.plot(range(len(scores)),scores)

@@ -57,7 +57,7 @@ class SnakeEnvironment:
         newDistance = self.distanceToApple()
 
         if newDistance < distance:
-            stepReward = 0.01
+            stepReward = 0
         for i in range(len(self.segments)-1):
             if self.segments[0] == self.segments[i+1]:
                 stepReward = -1

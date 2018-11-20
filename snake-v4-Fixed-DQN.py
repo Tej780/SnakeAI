@@ -3,7 +3,7 @@ import random
 import numpy as np
 from collections import deque
 from keras.models import Model
-from keras.layers import Dense, Dropout, Input, Lambda
+from keras.layers import Dense, Activation, Input, Lambda
 from keras.backend import mean, max, expand_dims
 from keras.optimizers import Adam
 from SnakeAI.SnakeEnv import SnakeEnvironment
@@ -18,14 +18,11 @@ class DQNAgent:
         self.dueling_type = 'avg'
 
         # Hyperparameters
-        self.gamma = 0.99    # discount rate
-        self.epsilon = 0.5  # exploration rate
-        self.epsilon_min = 0.05
-        self.epsilon_decay = 0.99
-        self.learning_rate = 0.01
-        self.model_depth = 1
-        self.layer_height = 2**5
-        self.layers = []
+        self.gamma = 0.995    # discount rate
+        self.epsilon = 1.0  # exploration rate
+        self.epsilon_min = 0.01
+        self.epsilon_decay = 0.995
+        self.learning_rate = 0.001
         self.DQN = self._build_model()
         self.target_network = self._build_model()
 
@@ -33,27 +30,24 @@ class DQNAgent:
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         _input = Input(shape=(self.state_size,))
-        x = Dense(256,  activation='relu')(_input)
-
-        #for i in range(self.model_depth):
-        #    x=Dense(self.layer_height, activation='relu')(x)
-        #   x=Dropout(0.3)(x)
+        x = Dense(12,  activation='relu')(_input)
+        x = Dense(24, activation='relu')(x)
 
         #Dueling DQN
-        y = Dense(self.action_size+1, activation='linear')(x)
+        x = Dense(self.action_size+1, activation='linear')(x)
 
         if self.dueling_type == 'avg':
-            _output = Lambda(
+            y = Lambda(
                 lambda a: expand_dims(a[:, 0], -1) + a[:, 1:] - mean(a[:, 1:], axis=1, keepdims=True),
-                output_shape=(self.action_size,))(y)
+                output_shape=(self.action_size,))(x)
         elif self.dueling_type == 'max':
-            _output = Lambda(
+            y = Lambda(
                 lambda a: expand_dims(a[:, 0], -1) + a[:, 1:] - max(a[:, 1:], axis=1, keepdims=True),
-                output_shape=(self.action_size,))(y)
+                output_shape=(self.action_size,))(x)
         else:
-            _output = Lambda(lambda a: expand_dims(a[:, 0], -1) + a[:, 1:], output_shape=(self.action_size,))(y)
+            y = Lambda(lambda a: expand_dims(a[:, 0], -1) + a[:, 1:], output_shape=(self.action_size,))(x)
 
-
+        _output = Activation('softmax')(y)
         model = Model(inputs=_input,outputs=_output)
         model.compile(loss='mse',
                       optimizer=Adam(lr=self.learning_rate))
@@ -93,11 +87,10 @@ class DQNAgent:
     def update_target_weights(self):
         self.target_network.set_weights(self.DQN.get_weights())
 
-
 EPISODES = 10000
 DURATION = 500
-SW = 10
-SH = 10
+SW = 20
+SH = 20
 tau = 100
 
 if __name__ == "__main__":
@@ -107,7 +100,7 @@ if __name__ == "__main__":
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
     batch_size = 50
-    #agent.load("snake-v4-dqn.h5")
+    agent.load("snake-v4-dqn.h5")
     print(agent.DQN.summary())
     scores = []
 
@@ -127,15 +120,15 @@ if __name__ == "__main__":
                       .format(e, EPISODES, env.totalReward, agent.epsilon))
                 scores.append(env.totalReward)
                 break
-
-            if len(agent.memory) > batch_size:
-                agent.replay(batch_size)
             if time % tau == 0:
                 agent.update_target_weights()
+
+                if len(agent.memory) > batch_size:
+                    agent.replay(batch_size)
+
         if e % 10 == 0:
             agent.save("snake-v4-dqn.h5")
 
 
     plt.plot(range(len(scores)),scores)
-    plt.title(('layer sizes: ',str(agent.layers),', network depth: ',str(len(agent.layers))))
     plt.show()
