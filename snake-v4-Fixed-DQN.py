@@ -18,10 +18,10 @@ class DQNAgent:
         self.dueling_type = 'avg'
 
         # Hyperparameters
-        self.gamma = 0.995    # discount rate
+        self.gamma = 0.99    # discount rate
         self.epsilon = 1.0  # exploration rate
-        self.epsilon_min = 0.01
-        self.epsilon_decay = 0.995
+        self.epsilon_min = 0.1
+        self.epsilon_decay = 0.99
         self.learning_rate = 0.001
         self.DQN = self._build_model()
         self.target_network = self._build_model()
@@ -87,15 +87,14 @@ class DQNAgent:
     def update_target_weights(self):
         self.target_network.set_weights(self.DQN.get_weights())
 
-EPISODES = 10000
-DURATION = 500
-SW = 20
-SH = 20
+EPISODES = 500
+DURATION = 200
+SS = 20
 tau = 100
 
 if __name__ == "__main__":
     render = True
-    env = SnakeEnvironment(screenWidth = SW, screenHeight = SH,render = render)
+    env = SnakeEnvironment(screenSize = SS,render = render)
     state_size = len(env.state)
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
@@ -105,19 +104,23 @@ if __name__ == "__main__":
     scores = []
 
     for e in range(EPISODES):
-        env = SnakeEnvironment(screenWidth=SW, screenHeight=SH, render=render)
+        env = SnakeEnvironment(screenSize = SS, render=render)
         state = env.state
         state = np.reshape(state, [1, state_size])
+        apples_collected = 0
         for time in range(DURATION+1):
             action = agent.act(state)
-            next_state, reward, done, _ = env.step(action)
+            next_state, reward, done, apple = env.step(action)
+            apples_collected += apple
             next_state = np.reshape(next_state, [1, state_size])
+            if time == DURATION:
+                reward = -10
             if reward != 0:
                 agent.remember(state, action, reward, next_state, done)
             state = next_state
             if done or time == DURATION:
                 print("episode: {}/{}, score: {}, e: {:.2}"
-                      .format(e, EPISODES, env.totalReward, agent.epsilon))
+                      .format(e, EPISODES, apples_collected, agent.epsilon))
                 scores.append(env.totalReward)
                 break
             if time % tau == 0:
