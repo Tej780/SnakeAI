@@ -2,8 +2,8 @@
 import random
 import numpy as np
 from collections import deque
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.models import Model
+from keras.layers import Dense, Dropout, Input
 from keras.optimizers import Adam
 from SnakeAI.SnakeEnv import SnakeEnvironment
 import matplotlib.pyplot as plt
@@ -21,19 +21,20 @@ class DQNAgent:
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
         self.learning_rate = 0.01
-        self.model_depth = 1
-        self.layer_height = 2**5
-        self.layers = []
+        self.model_depth = random.randint(1,5)
+        self.layer_height = 2**random.randint(5,7)
         self.model = self._build_model()
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
-        model = Sequential()
-        model.add(Dense(16, input_dim=self.state_size, activation='relu'))
+        _input = Input(shape=(self.state_size,))
+        x = Dense(16,  activation='relu')(_input)
+
         for i in range(self.model_depth):
-            model.add(Dense(self.layer_height, activation='relu'))
-            model.add(Dropout(0.3))
-        model.add(Dense(self.action_size, activation='linear'))
+            x=Dense(self.layer_height, activation='relu')(x)
+            x=Dropout(0.3)(x)
+        _output = Dense(self.action_size, activation='linear')(x)
+        model = Model(inputs=_input,outputs=_output)
         model.compile(loss='mse',
                       optimizer=Adam(lr=self.learning_rate))
         return model
@@ -52,11 +53,12 @@ class DQNAgent:
         for state, action, reward, next_state, done in minibatch:
             target = reward
             if not done:
-                target = (reward + self.gamma *
-                          np.amax(self.model.predict(next_state)[0]))
-            target_f = self.model.predict(state)
+                action_for_next_state = self.act(next_state)
+                target = (reward + self.gamma * self.target_network.predict(next_state)[0][action_for_next_state]
+                          )
+            target_f = self.DQN.predict(state)
             target_f[0][action] = target
-            self.model.fit(state, target_f, epochs=1, verbose=0)
+            self.DQN.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
@@ -67,7 +69,7 @@ class DQNAgent:
         self.model.save_weights(name)
 
 
-EPISODES = 200
+EPISODES = 50
 DURATION = 500
 SW = 20
 SH = 20
@@ -79,7 +81,7 @@ if __name__ == "__main__":
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
     batch_size = 50
-    #agent.load("snake-v1-dqn.h5")
+    #agent.load("snake-v4-dqn.h5")
     print(agent.model.summary())
     scores = []
 
@@ -102,9 +104,12 @@ if __name__ == "__main__":
             if len(agent.memory) > batch_size:
                 agent.replay(batch_size)
         if e % 10 == 0:
-            agent.save("snake-v1-dqn.h5")
+            agent.save("snake-v4-dqn.h5")
 
 
     plt.plot(range(len(scores)),scores)
-    plt.title(('layer sizes: ',str(agent.layers),', network depth: ',str(len(agent.layers))))
+    plt.title(('layer sizes: ',str(agent.layer_height),', network depth: ',str(agent.model_depth)))
+    plt.xlabel('No. episodes')
+    plt.ylabel('Score')
     plt.show()
+    plt.savefig('score_trend.png')
