@@ -4,13 +4,7 @@
 
 ## Usage
 
-Run in terminal:
 
-```bash
-$ make env
-$ source .venv/bin/activate
-$ make run
-```
 ## Requirements
 Linux (Ubuntu)
 
