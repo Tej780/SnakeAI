@@ -6,7 +6,7 @@ from keras.models import Model
 from keras.layers import Dense, Activation, Input, Lambda
 from keras.backend import mean, max, expand_dims
 from keras.optimizers import Adam
-from SnakeAI.SnakeEnv import SnakeEnvironment
+from SnakeEnv import SnakeEnvironment
 import matplotlib.pyplot as plt
 
 
@@ -36,7 +36,9 @@ class DQNAgent:
         #Dueling DQN
         x = Dense(self.action_size+1, activation='linear')(x)
 
-        if self.dueling_type == 'avg':
+        if self.dueling_type == None:
+            y = Dense(self.action_size)(x)
+        elif self.dueling_type == 'avg':
             y = Lambda(
                 lambda a: expand_dims(a[:, 0], -1) + a[:, 1:] - mean(a[:, 1:], axis=1, keepdims=True),
                 output_shape=(self.action_size,))(x)
@@ -69,8 +71,8 @@ class DQNAgent:
             if not done:
                 #Double DQN
                 action_for_next_state = self.act(next_state)
-                target = (reward + self.gamma * self.target_network.predict(next_state)[0][action_for_next_state]
-                          )
+                target = (reward + self.gamma * self.target_network
+                          .predict(next_state)[0][action_for_next_state])
             target_f = self.DQN.predict(state)
             target_f[0][action] = target
             self.DQN.fit(state, target_f, epochs=1, verbose=0)
@@ -93,7 +95,7 @@ SS = 20
 tau = 100
 
 if __name__ == "__main__":
-    render = True
+    render = False
     env = SnakeEnvironment(screenSize = SS,render = render)
     state_size = len(env.state)
     action_size = len(env.actions)
@@ -130,6 +132,7 @@ if __name__ == "__main__":
                     agent.replay(batch_size)
 
         if e % 10 == 0:
+
             agent.save("snake-v4-dqn.h5")
 
 
