@@ -71,14 +71,14 @@ class SnakeEnvironment:
         new_distance = self.distance_to_apple()
 
         if new_distance < distance_to_apple:
-            stepReward += 1
+            stepReward += 5
         for i in range(len(self.segments)-1):
             if self.segments[0] == self.segments[i+1]:
-                stepReward += -10
+                stepReward += -100
                 self.died = True
                 break
         if self.isInWall(self.segments[0]):
-            stepReward += -10
+            stepReward += -100
             self.died = True
 
         if self.segments[0] == self.apple:
