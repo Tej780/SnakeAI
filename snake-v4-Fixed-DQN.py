@@ -9,6 +9,8 @@ from keras.layers import Dense, Activation, Input, Lambda
 from keras.models import Model
 from keras.optimizers import Adam
 
+from Highlights import replay_highlights
+
 from SnakeEnv import SnakeEnvironment
 
 def moving_average(a, n=3) :
@@ -25,10 +27,10 @@ class DQNAgent:
 
         # Hyperparameters
         self.gamma = 0.99  # discount rate
-        self.epsilon = 0.1  # exploration rate
-        self.epsilon_min = 0.0001
+        self.epsilon = 0.5  # exploration rate
+        self.epsilon_min = 0.01
         self.epsilon_decay = 0.9
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.00001
         self.DQN = self._build_model()
         self.target_network = self._build_model()
 
@@ -94,13 +96,15 @@ class DQNAgent:
 
 
 EPISODES = 1000
-DURATION = 400
+DURATION = 300
 SS = 20
 tau = 100
+episode_buffer = deque(maxlen=EPISODES)
+
 
 if __name__ == "__main__":
-    render = False
-    env = SnakeEnvironment(screenSize=SS, render=render)
+    render = True
+    env = SnakeEnvironment(screenSize=SS, render=render, duration=DURATION)
     state_size = len(env.state)
     action_size = len(env.actions)
     agent = DQNAgent(state_size, action_size)
@@ -110,7 +114,7 @@ if __name__ == "__main__":
     scores = []
 
     for e in range(EPISODES):
-        env = SnakeEnvironment(screenSize=SS, render=render)
+        env = SnakeEnvironment(screenSize=SS, render=render, duration=DURATION)
         state = env.state
         state = np.reshape(state, [1, state_size])
         apples_collected = 0
@@ -138,6 +142,14 @@ if __name__ == "__main__":
         if e % 10 == 0:
             agent.save("snake-v4-dqn.h5")
 
+        if apples_collected >= 10:
+            episode_buffer.append(list(env.frame_buffer))
+
+        env.clear_frame_buffer()
+
+    env.end_animation()
+    replay_highlights(episode_buffer, SS)
+    np.save('Highlights', episode_buffer)
     plt.plot(range(len(scores)), scores, 'g')
     plt.plot(range(len(scores)-2), moving_average(scores), 'k')
     plt.show()

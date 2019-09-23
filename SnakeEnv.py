@@ -1,9 +1,11 @@
 import sys
 from random import randint
+from collections import deque
+import numpy as np
 
 import pygame
 
-fps = 50
+fps = 140
 RED = [255, 0, 0]
 GREEN = [0, 255, 0]
 DARK_GREEN = [0, 128, 0]
@@ -11,7 +13,8 @@ DARK_GREEN = [0, 128, 0]
 
 class SnakeEnvironment:
 
-    def __init__(self, screenSize=10, render=False):
+    def __init__(self, screenSize=10, render=False, duration=100):
+        self.frame_buffer = deque(maxlen=duration)
         self.screenSize = screenSize
         self.segments = []
         for i in range(5):
@@ -98,6 +101,7 @@ class SnakeEnvironment:
 
         pygame.init()
         self.screen = pygame.display.set_mode(((self.screenSize + 1) * 10, (self.screenSize + 1) * 10))
+        pygame.display.set_caption('Training')
         pygame.mouse.set_visible(0)
         self.clock = pygame.time.Clock()
 
@@ -111,6 +115,10 @@ class SnakeEnvironment:
         pygame.draw.rect(self.screen, RED, apple)
 
         pygame.display.flip()
+
+        window_pixel_matrix = pygame.surfarray.array2d(self.screen)
+        self.frame_buffer.append(window_pixel_matrix)
+
         self.clock.tick(fps)
 
     def updateDisplay(self):
@@ -128,6 +136,9 @@ class SnakeEnvironment:
         apple = pygame.Rect(self.apple[0] * 10, self.apple[1] * 10, 10, 10)
         pygame.draw.rect(self.screen, RED, apple)
         pygame.display.update()
+
+        window_pixel_matrix = pygame.surfarray.array2d(self.screen)
+        self.frame_buffer.append(window_pixel_matrix)
 
         self.clock.tick(fps)
 
@@ -158,3 +169,9 @@ class SnakeEnvironment:
         for i in range(len(state)):
             state[i] = state[i] / self.screenSize
         return state
+
+    def clear_frame_buffer(self):
+        self.frame_buffer.clear()
+
+    def end_animation(self):
+        pygame.quit()
