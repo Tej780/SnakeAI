@@ -1,7 +1,8 @@
-import pygame
 import numpy as np
+import pygame
 
 fps = 60
+
 
 def replay_highlights(episode_list, screenSize):
     pygame.init()
@@ -14,13 +15,12 @@ def replay_highlights(episode_list, screenSize):
     for episode in episode_list:
 
         for frame in episode:
-
             pygame.surfarray.blit_array(screen, frame)
             pygame.display.flip()
             clock.tick(fps)
 
+
 if __name__ == "__main__":
     highlights = np.load('Highlights.npy', allow_pickle=True)
-
 
     replay_highlights(highlights, 20)

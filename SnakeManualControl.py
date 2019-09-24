@@ -1,12 +1,14 @@
-from SnakeEnv import SnakeEnvironment
-import pygame
 import sys
 
-SS=10
+import pygame
+
+from SnakeEnv import SnakeEnvironment
+
+SS = 10
 
 if __name__ == "__main__":
     render = True
-    env = SnakeEnvironment(screenSize = SS, render=render)
+    env = SnakeEnvironment(screenSize=SS, render=render)
     for time in range(500):
         action = 4
         for event in pygame.event.get():

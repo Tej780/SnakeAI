@@ -1,7 +1,6 @@
 import sys
-from random import randint
 from collections import deque
-import numpy as np
+from random import randint
 
 import pygame
 

@@ -10,13 +10,14 @@ from keras.models import Model
 from keras.optimizers import Adam
 
 from Highlights import replay_highlights
-
 from SnakeEnv import SnakeEnvironment
 
-def moving_average(a, n=3) :
+
+def moving_average(a, n=3):
     ret = np.cumsum(a, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     return ret[n - 1:] / n
+
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
@@ -101,7 +102,6 @@ SS = 20
 tau = 100
 episode_buffer = deque(maxlen=EPISODES)
 
-
 if __name__ == "__main__":
     render = True
     env = SnakeEnvironment(screenSize=SS, render=render, duration=DURATION)
@@ -151,5 +151,5 @@ if __name__ == "__main__":
     replay_highlights(episode_buffer, SS)
     np.save('Highlights', episode_buffer)
     plt.plot(range(len(scores)), scores, 'g')
-    plt.plot(range(len(scores)-2), moving_average(scores), 'k')
+    plt.plot(range(len(scores) - 2), moving_average(scores), 'k')
     plt.show()
