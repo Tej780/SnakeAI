@@ -37,7 +37,7 @@ class SnakeEnvironment:
 
     def step(self, actionArg):
 
-        stepReward = 0
+        stepReward = 0.02
         apples_collected = 0
         distance_to_apple = self.distance_to_apple()
         action = self.actions[actionArg]

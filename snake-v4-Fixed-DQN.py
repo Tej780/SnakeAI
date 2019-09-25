@@ -31,7 +31,7 @@ class DQNAgent:
         self.epsilon = 0.9  # exploration rate
         self.epsilon_min = 0.0
         self.epsilon_decay = 0.9
-        self.learning_rate = 0.00001
+        self.learning_rate = 0.000000001
         self.DQN = self._build_model()
         self.target_network = self._build_model()
 
@@ -96,7 +96,7 @@ class DQNAgent:
         self.target_network.set_weights(self.DQN.get_weights())
 
 
-EPISODES = 1000
+EPISODES = 500
 DURATION = 300
 SS = 20
 tau = 100
@@ -112,6 +112,7 @@ if __name__ == "__main__":
     agent.load("snake-v4-dqn.h5")
     print(agent.DQN.summary())
     scores = []
+    apples = []
 
     for e in range(EPISODES):
         env = SnakeEnvironment(screenSize=SS, render=render, duration=DURATION)
@@ -131,6 +132,7 @@ if __name__ == "__main__":
             if done or time == DURATION:
                 print("episode: {}/{}, score: {}, e: {:.2}"
                       .format(e, EPISODES, apples_collected, agent.epsilon))
+                apples.append(apples_collected)
                 scores.append(env.totalReward)
                 break
             if time % tau == 0:
@@ -150,6 +152,7 @@ if __name__ == "__main__":
     env.end_animation()
     replay_highlights(episode_buffer, SS)
     np.save('Highlights', episode_buffer)
+    plt.plot(range(len(apples)), apples, 'r')
     plt.plot(range(len(scores)), scores, 'g')
     plt.plot(range(len(scores) - 2), moving_average(scores), 'k')
     plt.show()
