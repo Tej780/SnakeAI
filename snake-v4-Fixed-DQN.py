@@ -28,8 +28,8 @@ class DQNAgent:
 
         # Hyperparameters
         self.gamma = 0.99  # discount rate
-        self.epsilon = 0.5  # exploration rate
-        self.epsilon_min = 0.01
+        self.epsilon = 0.9  # exploration rate
+        self.epsilon_min = 0.0
         self.epsilon_decay = 0.9
         self.learning_rate = 0.00001
         self.DQN = self._build_model()

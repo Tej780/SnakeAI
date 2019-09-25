@@ -4,7 +4,7 @@ import pygame
 
 from SnakeEnv import SnakeEnvironment
 
-SS = 10
+SS = 20
 
 if __name__ == "__main__":
     render = True

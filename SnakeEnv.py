@@ -1,6 +1,7 @@
 import sys
 from collections import deque
 from random import randint
+import numpy as np
 
 import pygame
 
@@ -16,7 +17,7 @@ class SnakeEnvironment:
         self.frame_buffer = deque(maxlen=duration)
         self.screenSize = screenSize
         self.segments = []
-        for i in range(5):
+        for i in range(2):
             self.segments.append([screenSize / 2, (screenSize / 2) + 1])
 
         self.apple = self.randomLocation()
@@ -73,7 +74,8 @@ class SnakeEnvironment:
         new_distance = self.distance_to_apple()
 
         if new_distance < distance_to_apple:
-            stepReward += 1
+            stepReward += (self.screenSize * np.sqrt(2) - new_distance)/(self.screenSize * np.sqrt(2))
+
         for i in range(len(self.segments) - 1):
             if self.segments[0] == self.segments[i + 1]:
                 stepReward += -10
