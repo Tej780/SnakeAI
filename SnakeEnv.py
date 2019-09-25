@@ -33,11 +33,14 @@ class SnakeEnvironment:
             self.initialiseRender()
 
     def randomLocation(self):
-        return [randint(0, self.screenSize), randint(0, self.screenSize)]
+        loc = [randint(0, self.screenSize), randint(0, self.screenSize)]
+        while loc in self.segments:
+            loc = [randint(0, self.screenSize), randint(0, self.screenSize)]
+        return loc
 
     def step(self, actionArg):
 
-        stepReward = 0
+        stepReward = 0.02
         apples_collected = 0
         distance_to_apple = self.distance_to_apple()
         action = self.actions[actionArg]
@@ -92,7 +95,7 @@ class SnakeEnvironment:
             apples_collected += 1
 
         new_state = self.get_state()
-        self.totalReward += apples_collected
+        self.totalReward += stepReward
         if self.render:
             self.updateDisplay()
 
