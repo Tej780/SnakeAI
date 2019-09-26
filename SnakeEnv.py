@@ -85,7 +85,7 @@ class SnakeEnvironment:
                 self.died = True
                 break
         if self.isInWall(self.segments[0]):
-            stepReward += -100
+            stepReward += -10
             self.died = True
 
         if self.segments[0] == self.apple:
